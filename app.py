@@ -51,6 +51,22 @@ def telemetry():
         return Response("content type not supported", status=415)
 
 
+@app.route("/prometheus", methods=['POST'])
+def prometheus():
+    query_params = request.args
+    if request_id_param not in query_params.keys():
+        return Response(
+            "[bad request]: missing request_id param",
+            status=400
+        )
+
+    folder_name = query_params.get(request_id_param)
+    bucket_name = os.getenv("BUCKET_NAME")
+    file_stream = request.stream
+    s_three = boto3.client('s3')
+    s_three.upload_fileobj(file_stream, bucket_name, f"{folder_name}/test_file")
+    return Response(f"record {folder_name}/test_file created")
+
 def validate_data_model(model: ChaosRunTelemetry) -> Optional[Response]:
     for scenario in model.scenarios:
         for attr, _ in scenario.__dict__.items():
