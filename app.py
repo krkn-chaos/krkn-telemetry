@@ -73,7 +73,7 @@ def presigned_post():
     resp = s_three.generate_presigned_url(
             ClientMethod="put_object",
             Params={'Bucket': os.getenv("BUCKET_NAME"), 'Key': f"{request_id}/{remote_filename}"},
-            ExpiresIn=1200
+            ExpiresIn=int(os.getenv("S3_LINK_EXPIRATION"))
         )
     return Response(resp)
 
