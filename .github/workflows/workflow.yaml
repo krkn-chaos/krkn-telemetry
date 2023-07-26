@@ -21,10 +21,9 @@ jobs:
         aws-region: us-west-2
     - name: Install poetry
       run: |
-        aws s3 ls
         pip install poetry
     - name: Install dependencies
       run: poetry install --no-interaction
 
     - name: Zappa deployments
-      run: poetry run zappa update -q production
+      run: poetry run zappa update production

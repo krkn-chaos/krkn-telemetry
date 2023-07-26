@@ -9,9 +9,10 @@ from typing import Optional
 app = Flask(__name__)
 
 request_id_param: str = "request_id"
+remote_filename_param: str = "remote_filename"
 
 
-@app.route("/", methods=['POST'])
+@app.route("/telemetry", methods=['POST'])
 def telemetry():
     content_type = request.headers.get('Content-Type')
     if content_type == 'application/json':
@@ -51,21 +52,30 @@ def telemetry():
         return Response("content type not supported", status=415)
 
 
-@app.route("/prometheus", methods=['POST'])
-def prometheus():
+
+@app.route("/presigned-url", methods=['GET'])
+def presigned_post():
     query_params = request.args
     if request_id_param not in query_params.keys():
         return Response(
-            "[bad request]: missing request_id param",
+            f"[bad request]: missing {request_id_param} query param",
             status=400
         )
-
-    folder_name = query_params.get(request_id_param)
-    bucket_name = os.getenv("BUCKET_NAME")
-    file_stream = request.stream
+    if remote_filename_param not in query_params.keys():
+        return Response(
+            f"[bad request]: missing  {remote_filename_param} query param",
+            status=400
+        )
+    request_id = query_params[request_id_param]
+    remote_filename = query_params[remote_filename_param]
     s_three = boto3.client('s3')
-    s_three.upload_fileobj(file_stream, bucket_name, f"{folder_name}/test_file")
-    return Response(f"record {folder_name}/test_file created")
+
+    resp = s_three.generate_presigned_url(
+            ClientMethod="put_object",
+            Params={'Bucket': os.getenv("BUCKET_NAME"), 'Key': f"{request_id}/{remote_filename}"},
+            ExpiresIn=1200
+        )
+    return Response(resp)
 
 def validate_data_model(model: ChaosRunTelemetry) -> Optional[Response]:
     for scenario in model.scenarios:
