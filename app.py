@@ -1,9 +1,11 @@
 # save this as app.py
 import os
+from datetime import datetime, timedelta
+
 import boto3
 import json
 from krkn_lib_kubernetes import ChaosRunTelemetry
-from flask import Flask, Response, request
+from flask import Flask, Response, request, render_template
 from typing import Optional
 
 app = Flask(__name__)
@@ -76,6 +78,30 @@ def presigned_post():
             ExpiresIn=int(os.getenv("S3_LINK_EXPIRATION"))
         )
     return Response(resp)
+
+@app.route("/download/<request_id>", methods=['GET'])
+def download(request_id):
+    if request_id is None:
+        return Response("400", "request_id is missing")
+    s_three = boto3.client('s3')
+    files = s_three.list_objects_v2(Bucket=os.getenv("BUCKET_NAME"), Prefix=request_id)
+    if "Contents" not in files.keys():
+        return render_template("telemetry_not_found.html", request_id=request_id)
+
+    bucket_files=[]
+    for key in files["Contents"]:
+        link = s_three.generate_presigned_url(
+            ClientMethod="get_object",
+            Params={'Bucket': os.getenv("BUCKET_NAME"), 'Key': key["Key"]},
+            ExpiresIn=int(os.getenv("S3_LINK_EXPIRATION"))
+        )
+        bucket_files.append((link, key["Key"].replace(f"{request_id}/","") ,key["Size"], key["LastModified"]))
+    expires=datetime.today() + timedelta(seconds=float(os.getenv("S3_LINK_EXPIRATION")))
+    return render_template('download_template.html',
+                           files=bucket_files,
+                           expiration=expires,
+                           request_id=request_id
+                           )
 
 def validate_data_model(model: ChaosRunTelemetry) -> Optional[Response]:
     for scenario in model.scenarios:
