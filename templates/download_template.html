@@ -8,7 +8,9 @@
 <body>
 <h1> telemetry data for run id: {{ request_id }}</h1>
 <h2> links will expire: {{ expiration }} refresh the page to renew them</h2>
-<h2> once the archive files will be all downloaded to untar them run the command <code>printf 'n prometheus-%02d.tar\n' {1..100} | tar xfM prometheus-00.tar</code></h2>
+{% if files_number > 0 %}
+<h2> once the archive files will be all downloaded to untar them run the command <code>printf 'n prometheus-%02d.tar\n' {1..{{ files_number }}} | tar xfM prometheus-00.tar</code></h2>
+{% endif %}
 <label for="search">Search File:</label>
 <br/>
 <input type="text" id="search" onkeyup="filter('search','files')" placeholder="file name..">

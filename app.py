@@ -117,11 +117,14 @@ def download(request_id):
     expires = datetime.today() + timedelta(
         seconds=float(os.getenv("S3_LINK_EXPIRATION"))
     )
+
     return render_template(
         "download_template.html",
         files=bucket_files,
         expiration=expires,
         request_id=request_id,
+        files_number=len(list(filter(lambda k: "prometheus-" in k[1], bucket_files)))
+        - 1,
     )
 
 
