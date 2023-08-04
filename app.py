@@ -87,7 +87,10 @@ def list_bucket():
     folders = sorted(folders)
     for folder in folders:
         folder_tuples.append((f"{request.base_url}{folder.replace('/','')}", folder))
-    return render_template("root_directory_template.html", folders=folder_tuples)
+    return render_template(
+        "telemetry_folders.html",
+        folders=folder_tuples,
+    )
 
 
 @app.route("/download/<request_id>", methods=["GET"])
@@ -97,7 +100,11 @@ def download(request_id):
     s_three = boto3.client("s3")
     files = s_three.list_objects_v2(Bucket=os.getenv("BUCKET_NAME"), Prefix=request_id)
     if "Contents" not in files.keys():
-        return render_template("telemetry_not_found.html", request_id=request_id)
+        return render_template(
+            "telemetry_not_found.html",
+            request_id=request_id,
+            home_url=f"{request.root_url}download",
+        )
 
     bucket_files = []
     for key in files["Contents"]:
@@ -119,12 +126,13 @@ def download(request_id):
     )
 
     return render_template(
-        "download_template.html",
+        "downloads.html",
         files=bucket_files,
         expiration=expires,
         request_id=request_id,
         files_number=len(list(filter(lambda k: "prometheus-" in k[1], bucket_files)))
         - 1,
+        home_url=f"{request.root_url}download",
     )
 
 

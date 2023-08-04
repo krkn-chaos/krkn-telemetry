@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Downloads</title>
+    {% include 'components/bootstrap.html' %}
+    {% include 'components/search.html' %}
+    {% include 'components/clipboard.html' %}
+
+    <script>
+      function convertDate(){
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        var date = document.getElementById("date_utc").innerText + "Z";
+        var local_date = new Date(date).toLocaleString()
+        document.getElementById("date_local").innerText = local_date + " ("+tz+")"
+      }
+
+    </script>
+</head>
+
+<body onload="convertDate()">
+{% include 'components/nav_bar.html' %}
+<div cass="container">
+  <div class="col w-50 col-md-8 mx-auto">
+    <div class="row mt-5">
+      <p>
+        <h1> Telemetry data download</h1>
+        <h1> {{ base_url }}</h1>
+      </p>
+      <p>
+      <h5><b>Run id:</b> {{ request_id }}</h5>
+      </p>
+      <p>
+      <div id="date_utc" hidden="">{{ expiration }}</div>
+      <h5><b>Download links will expire: </b><span id="date_local"></span></h5>
+      <h5>refresh the page to renew them</h5>
+      </p>
+
+    </div>
+
+    <div class="row mt-5">
+      {% if files_number > 0 %}
+      <h5> once the archive files will be all downloaded to untar them run the command:</h5>
+      <div class="col">
+        <h5><code id="shell_code">printf 'n prometheus-%02d.tar\n' {1..{{ files_number }}} | tar xfM prometheus-00.tar</code></h5>
+      </div>
+      <div class="col col-xl-1">
+        <button onclick="copyText('shell_code')"><i class="fa-solid fa-copy"></i></button>
+      </div>
+      {% endif %}
+    </div>
+
+
+    <div class="row w-50 mt-5">
+      <div class="input-group">
+        <span class="input-group-text" id="basic-addon1">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+        <input type="search" id="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" onkeyup="filter('search','files')"/>
+      </div>
+    </div>
+
+    <div class="row mt-5">
+      <table id="files" class="table table-bordered">
+        <tr>
+          <th>File Name</th>
+          <th>Size</th>
+          <th>Last Modified</th>
+        </tr>
+        {% for key in files %}
+        <tr>
+          <td><a href="{{ key[0] }}">{{ key[1] }}</a></td>
+          <td>{{ key[2]/1024 }} KB</td>
+          <td>{{ key[3] }} (UTC)</td>
+        <tr>
+        {% endfor %}
+      </table>
+    </div>
+</div>
+</div>
+</body>
+</html>

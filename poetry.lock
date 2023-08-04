@@ -161,18 +161,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.28.17"
+version = "1.28.19"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.17-py3-none-any.whl", hash = "sha256:bca0526f819e0f19c0f1e6eba3e2d1d6b6a92a45129f98c0d716e5aab6d9444b"},
-    {file = "boto3-1.28.17.tar.gz", hash = "sha256:90f7cfb5e1821af95b1fc084bc50e6c47fa3edc99f32de1a2591faa0c546bea7"},
+    {file = "boto3-1.28.19-py3-none-any.whl", hash = "sha256:1bae3e6222c7272af44ab4dc456fc4cb7d2d7044489b7a4a08f9cd0fbad6d213"},
+    {file = "boto3-1.28.19.tar.gz", hash = "sha256:8630c2c38c3130e31e1a4182943aee8bc7dd1a1ad9729092b46fdbc8ac045a77"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.17,<1.32.0"
+botocore = ">=1.31.19,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -181,14 +181,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.17"
+version = "1.31.19"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.17-py3-none-any.whl", hash = "sha256:6ac34a1d34aa3750e78b77b8596617e2bab938964694d651939dba2cbde2c12b"},
-    {file = "botocore-1.31.17.tar.gz", hash = "sha256:396459065dba4339eb4da4ec8b4e6599728eb89b7caaceea199e26f7d824a41c"},
+    {file = "botocore-1.31.19-py3-none-any.whl", hash = "sha256:15f269945f319b0263cde9a61a25f2c9a83f6074b62cddae71edafec4a61e637"},
+    {file = "botocore-1.31.19.tar.gz", hash = "sha256:724f9a1a91f88291f5adc6347705a31e52312c88cddd56e38709215b161e025a"},
 ]
 
 [package.dependencies]
@@ -765,6 +765,7 @@ develop = false
 [package.dependencies]
 arcaflow-lib-kubernetes = "^0.1.2"
 base64io = "^1.0.3"
+kubeconfig = "^1.1.1"
 kubernetes = "^26.0.0"
 requests = "^2.29.0"
 sphinxnotes-markdown-builder = "^0.5.6"
@@ -772,8 +773,22 @@ sphinxnotes-markdown-builder = "^0.5.6"
 [package.source]
 type = "git"
 url = "https://github.com/redhat-chaos/krkn-lib-kubernetes.git"
-reference = "krkn_telemetry"
-resolved_reference = "3d8f1a2ca1c6f2e80cbc523a6000865db5d1bf35"
+reference = "main"
+resolved_reference = "f7b1c0bb42f3c233c66fe45e12a136220e6b1e93"
+
+[[package]]
+name = "kubeconfig"
+version = "1.1.1"
+description = "A simple wrapper around Kubernetes kubectl"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "kubeconfig-1.1.1.tar.gz", hash = "sha256:3982b074c47f2ebe8e75c887fb6745d8860a4d87a51bc96c7a42c03721186990"},
+]
+
+[package.dependencies]
+PyYAML = ">=5.2"
 
 [[package]]
 name = "kubernetes"
@@ -1910,4 +1925,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "90672e280d1023d2977eb9a107b680bc1a30dafe3d91384fc02cc4290b2d30f5"
+content-hash = "8234bcff2ce4319513fedb8aaf77ec93a3d72176c1fa2cea5bf03f8bf2932e8d"

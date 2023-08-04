@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Empty Bucket!</title>
+    {% include 'components/bootstrap.html' %}
 </head>
 <body>
-    <h1>Empty Bucket!</h1>
-    <h2>No data has been collected yet!</h2>
+    {% include 'components/nav_bar.html' %}
+    <div class="col w-50 col-md-8 mx-auto">
+        <div class="row mt-5">
+            <h1>Empty Bucket!</h1>
+            <h3>No data has been collected yet!</h3>
+        </div>
+    </div>
 </body>
 </html>

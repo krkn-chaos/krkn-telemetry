@@ -1,0 +1,42 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <!-- Container wrapper -->
+  <div class="container-fluid">
+    <!-- Toggle button -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-mdb-toggle="collapse"
+      data-mdb-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Collapsible wrapper -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <!-- Navbar brand -->
+        <img
+          src="https://github.com/redhat-chaos/krkn/raw/main/media/logo.png"
+          height="70"
+          alt="MDB Logo"
+          loading="lazy"
+        />
+      <!-- Left links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {% if home_url is defined %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ home_url }}">Telemetry Folders</a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/redhat-chaos/krkn">GitHub</a>
+        </li>
+      </ul>
+      <!-- Left links -->
+    </div>
+  </div>
+</nav>
+<!-- Navbar -->
