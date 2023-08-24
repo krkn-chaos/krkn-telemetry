@@ -1,12 +1,11 @@
 # save this as app.py
 import os
-from datetime import datetime, timedelta
-
 import boto3
 import json
-from krkn_lib_kubernetes import ChaosRunTelemetry
+from krkn_lib.models.telemetry import ChaosRunTelemetry
 from flask import Flask, Response, request, render_template
 from typing import Optional
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
