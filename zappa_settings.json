@@ -4,6 +4,7 @@
         "aws_region": "us-west-2",
         "project_name": "krkn-telemetry",
         "runtime": "python3.9",
-        "s3_bucket": "krkn-telemetry-lambda-bucket"
+        "s3_bucket": "krkn-telemetry-lambda-bucket",
+        "slim_handler": true
     }
 }
