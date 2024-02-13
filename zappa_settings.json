@@ -2,6 +2,22 @@
     "production": {
         "app_function": "app.app",
         "aws_region": "us-west-2",
+        "environment_variables": {
+            "BUCKET_NAME": "",
+            "S3_LINK_EXPIRATION": "1200"
+        },
+        "project_name": "krkn-telemetry",
+        "runtime": "python3.9",
+        "s3_bucket": "krkn-telemetry-lambda-bucket",
+        "slim_handler": true
+    },
+    "test": {
+        "app_function": "app.app",
+        "aws_region": "us-west-2",
+        "environment_variables": {
+            "BUCKET_NAME": "",
+            "S3_LINK_EXPIRATION": "1200"
+        },
         "project_name": "krkn-telemetry",
         "runtime": "python3.9",
         "s3_bucket": "krkn-telemetry-lambda-bucket",

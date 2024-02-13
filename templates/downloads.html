@@ -42,7 +42,7 @@
       {% if files_number > 0 %}
       <h5> once the archive files will be all downloaded to untar them run the command:</h5>
       <div class="col">
-        <h5><code id="shell_code">printf 'n prometheus-%02d.tar\n' {1..{{ files_number }}} | tar xfM prometheus-00.tar</code></h5>
+        <h5><code id="shell_code">cat prometheus-* > prometheus-backup.tar && tar xfv prometheus-backup.tar</code></h5>
       </div>
       <div class="col col-xl-1">
         <button onclick="copyText('shell_code')"><i class="fa-solid fa-copy"></i></button>

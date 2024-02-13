@@ -13,6 +13,10 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: 3.9
+    - name: Set Secrets
+      run: |
+        CONTENT=`jq '.production.environment_variables.BUCKET_NAME="${{secrets.LAMBDA_PRODUCTION_BUCKET}}"' zappa_settings.json` && echo $CONTENT > zappa_settings.json
+        CONTENT=`jq '.test.environment_variables.BUCKET_NAME="${{secrets.LAMBDA_TEST_BUCKET}}"' zappa_settings.json` && echo $CONTENT > zappa_settings.json
     - name: Configure AWS Creds
       uses: aws-actions/configure-aws-credentials@v2
       with:
@@ -26,4 +30,6 @@ jobs:
       run: poetry install --no-interaction
 
     - name: Zappa deployments
-      run: poetry run zappa update production
+      run: |
+        poetry run zappa update production
+        poetry run zappa update test
