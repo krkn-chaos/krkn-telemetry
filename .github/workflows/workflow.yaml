@@ -1,11 +1,67 @@
 name: Master Workflow
 
 on:
+  pull_request:
   push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
     branches:
       - main
 jobs:
-  deploy:
+  deploy-dev:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Set Secrets
+        run: |
+          CONTENT=`jq '.test.environment_variables.BUCKET_NAME="${{secrets.LAMBDA_DEV_BUCKET}}"' zappa_settings.json` && echo $CONTENT > zappa_settings.json
+      - name: Configure AWS Creds
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - name: Install poetry
+        run: |
+          pip install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction
+      - name: Zappa deployments
+        run: |
+          poetry run zappa update dev
+  deploy-test:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Set Secrets
+        run: |          
+          CONTENT=`jq '.test.environment_variables.BUCKET_NAME="${{secrets.LAMBDA_TEST_BUCKET}}"' zappa_settings.json` && echo $CONTENT > zappa_settings.json
+      - name: Configure AWS Creds
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - name: Install poetry
+        run: |
+          pip install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction
+      - name: Zappa deployments
+        run: |
+          poetry run zappa update test
+  deploy-production:
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -16,7 +72,6 @@ jobs:
     - name: Set Secrets
       run: |
         CONTENT=`jq '.production.environment_variables.BUCKET_NAME="${{secrets.LAMBDA_PRODUCTION_BUCKET}}"' zappa_settings.json` && echo $CONTENT > zappa_settings.json
-        CONTENT=`jq '.test.environment_variables.BUCKET_NAME="${{secrets.LAMBDA_TEST_BUCKET}}"' zappa_settings.json` && echo $CONTENT > zappa_settings.json
     - name: Configure AWS Creds
       uses: aws-actions/configure-aws-credentials@v2
       with:
@@ -28,8 +83,6 @@ jobs:
         pip install poetry
     - name: Install dependencies
       run: poetry install --no-interaction
-
     - name: Zappa deployments
       run: |
         poetry run zappa update production
-        poetry run zappa update test
