@@ -1,11 +1,11 @@
-# save this as app.py
 import os
-import boto3
+import re
 import json
-from krkn_lib.models.telemetry import ChaosRunTelemetry
-from flask import Flask, Response, request, render_template
+from flask import Flask, Response, request, render_template, jsonify, redirect
 from typing import Optional
-from datetime import datetime, timedelta
+import boto3
+from krkn_lib.models.telemetry import ChaosRunTelemetry, S3BucketObject
+
 
 app = Flask(__name__)
 
@@ -14,6 +14,12 @@ request_id_param: str = "request_id"
 remote_filename_param: str = "remote_filename"
 
 
+@app.route("/", methods=["GET"])
+def root():
+    return redirect("/files", code=302)
+
+
+## TELEMETRY JSON API
 @app.route("/telemetry", methods=["POST"])
 def telemetry():
     content_type = request.headers.get("Content-Type")
@@ -50,6 +56,7 @@ def telemetry():
         return Response("content type not supported", status=415)
 
 
+## UPLOAD URL API
 @app.route("/presigned-url", methods=["GET"])
 def presigned_post():
     query_params = request.args
@@ -80,65 +87,108 @@ def presigned_post():
     return Response(resp)
 
 
-@app.route("/download/", methods=["GET"])
-def list_bucket():
-    s_three = boto3.client("s3")
-    folders = set[str]()
-    folder_tuples = []
-    items = s_three.list_objects_v2(Bucket=os.getenv("BUCKET_NAME"), Delimiter="/")
-    if "CommonPrefixes" not in items.keys():
-        return render_template("data_not_found.html")
-    for folder in items["CommonPrefixes"]:
-        folders.add(folder["Prefix"])
-    folders = sorted(folders)
-    for folder in folders:
-        folder_tuples.append((f"{request.base_url}{folder.replace('/','')}", folder))
-    return render_template(
-        "telemetry_folders.html",
-        folders=folder_tuples,
-    )
-
-
-@app.route("/download/<request_id>", methods=["GET"])
-def download(request_id):
-    if request_id is None:
-        return Response("400", "request_id is missing")
-    s_three = boto3.client("s3")
-    files = s_three.list_objects_v2(Bucket=os.getenv("BUCKET_NAME"), Prefix=request_id)
-    if "Contents" not in files.keys():
-        return render_template(
-            "telemetry_not_found.html",
-            request_id=request_id,
-            home_url=f"{request.root_url}download",
-        )
-
-    bucket_files = []
-    for key in files["Contents"]:
+## DOWNLOAD URL API
+@app.route("/download-url/<filename>", methods=["GET"])
+@app.route("/download-url/<group_id>/<filename>", methods=["GET"])
+@app.route("/download-url/<group_id>/<run_id>/<filename>", methods=["GET"])
+def get_download_link(filename, group_id=None, run_id=None):
+    try:
+        file_path = filename
+        if group_id:
+            file_path = f"{group_id}/{filename}"
+        if run_id:
+            file_path = f"{group_id}/{run_id}/{filename}"
+        s_three = boto3.client("s3")
         link = s_three.generate_presigned_url(
             ClientMethod="get_object",
-            Params={"Bucket": os.getenv("BUCKET_NAME"), "Key": key["Key"]},
+            Params={
+                "Bucket": os.getenv("BUCKET_NAME"),
+                "Key": file_path,
+            },
             ExpiresIn=int(os.getenv("S3_LINK_EXPIRATION")),
         )
-        bucket_files.append(
-            (
-                link,
-                key["Key"].replace(f"{request_id}/", ""),
-                key["Size"],
-                key["LastModified"],
-            )
-        )
-    expires = datetime.today() + timedelta(
-        seconds=float(os.getenv("S3_LINK_EXPIRATION"))
+    except Exception as e:
+        return Response("400", f"error fetching download url: {e}")
+    return jsonify({"download_link": link})
+
+
+## BUCKET NAVIGATION API
+@app.route("/navigate")
+@app.route("/navigate/<group>")
+@app.route("/navigate/<group>/<run>")
+def get_objects(group=None, run=None):
+    s3 = boto3.client("s3")
+    s3_paginator = s3.get_paginator("list_objects_v2")
+    delimiter = "/"
+    prefix = ""
+    if group:
+        prefix = f"{group}/"
+    if run:
+        prefix = f"{group}/{run}/"
+    s3_iterator = s3_paginator.paginate(
+        Bucket=os.getenv("BUCKET_NAME"),
+        Delimiter=delimiter,
+        Prefix=prefix,
+        PaginationConfig={"MaxItems": 13},
     )
+    objects = []
+    for key_data in s3_iterator:
+        keys = key_data.keys()
+        if "Contents" in keys:
+            for file in key_data["Contents"]:
+                s3_object = S3BucketObject(
+                    path=re.sub(r"^.+/(.+)$", r"\1", file["Key"]),
+                    type="file",
+                    size=file["Size"],
+                    modified=file["LastModified"],
+                )
+                objects.append(s3_object)
+        if "CommonPrefixes" in keys:
+            for s3_folder in key_data["CommonPrefixes"]:
+                s3_object = S3BucketObject(
+                    path=re.sub(r"^.+/(.+)$", r"\1", s3_folder["Prefix"]),
+                    type="folder",
+                    size=0,
+                    modified="",
+                )
+                objects.append(s3_object)
+    return jsonify(objects)
+
+
+## TELEMETRY FILE MANAGER UI
+@app.route("/files/<group_id>/<run_id>/", methods=["GET"])
+@app.route("/files/<group_id>/", methods=["GET"])
+@app.route("/files/", methods=["GET"])
+def get_groups(group_id=None, run_id=None):
+    if not group_id and not run_id:
+        return render_template(
+            "telemetry_files.html",
+            navigation_api=f"{request.root_url}navigate",
+            download_url_api=f"{request.root_url}download-url",
+            link_url=request.base_url,
+            request_path=request.path,
+            run_id=run_id,
+            group_id=group_id,
+        )
+    if group_id and not run_id:
+        return render_template(
+            "telemetry_files.html",
+            navigation_api=f"{request.root_url}navigate/{group_id}",
+            download_url_api=f"{request.root_url}download-url",
+            link_url=request.base_url,
+            request_path=request.path,
+            run_id=run_id,
+            group_id=group_id,
+        )
 
     return render_template(
-        "downloads.html",
-        files=bucket_files,
-        expiration=expires,
-        request_id=request_id,
-        files_number=len(list(filter(lambda k: "prometheus-" in k[1], bucket_files)))
-        - 1,
-        home_url=f"{request.root_url}download",
+        "telemetry_files.html",
+        navigation_api=f"{request.root_url}navigate/{group_id}/{run_id}",
+        download_url_api=f"{request.root_url}download-url",
+        link_url=request.base_url,
+        request_path=request.path,
+        run_id=run_id,
+        group_id=group_id,
     )
 
 
