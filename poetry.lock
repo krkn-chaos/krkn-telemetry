@@ -1126,34 +1126,30 @@ files = [
 
 [[package]]
 name = "krkn-lib"
-version = "0.0.0"
+version = "2.0.0"
 description = "Foundation library for Kraken"
 optional = false
-python-versions = "^3.9"
-files = []
-develop = false
+python-versions = ">=3.9,<4.0"
+files = [
+    {file = "krkn_lib-2.0.0-py3-none-any.whl", hash = "sha256:fd77cdeb5297c62526813ee6d0010a33fbd9e03f5aa434c27bc26d0362e8d9fd"},
+    {file = "krkn_lib-2.0.0.tar.gz", hash = "sha256:fe1f18c135c8e75d83231a3906a14b280d12740045cb16457a4b29f9abd7079a"},
+]
 
 [package.dependencies]
 arcaflow-lib-kubernetes = "0.1.2"
-base64io = "^1.0.3"
+base64io = ">=1.0.3,<2.0.0"
 cython = "3.0"
 elasticsearch = "7.13.4"
-kubeconfig = "^1.1.1"
+kubeconfig = ">=1.1.1,<2.0.0"
 kubernetes = "26.1.0"
-prometheus-api-client = "^0.5.4"
-pytz = "^2023.3"
+prometheus-api-client = ">=0.5.4,<0.6.0"
+pytz = ">=2023.3,<2024.0"
 PyYAML = "6.0"
-requests = "^2.29.0"
-sphinx-rtd-theme = "^1.2.2"
-sphinxnotes-markdown-builder = "^0.5.6"
+requests = ">=2.29.0,<3.0.0"
+sphinx-rtd-theme = ">=1.2.2,<2.0.0"
+sphinxnotes-markdown-builder = ">=0.5.6,<0.6.0"
 tzlocal = "5.1"
-wheel = "^0.42.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/krkn-chaos/krkn-lib.git"
-reference = "telemetry_ws_rework"
-resolved_reference = "2ccfe2db1b4d673e262598f3b4124d5eba8d67be"
+wheel = ">=0.42.0,<0.43.0"
 
 [[package]]
 name = "kubeconfig"
@@ -2727,4 +2723,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "df5450317ce242615144873d01374bebd8733f15970b5dce4793dca7f2976da6"
+content-hash = "60438559ca35610b8a82a270a41146e11432cbf147373bcdb83eb138622263da"

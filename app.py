@@ -9,8 +9,8 @@ from krkn_lib.models.telemetry import ChaosRunTelemetry, S3BucketObject
 
 app = Flask(__name__)
 
-telemetry_category: str = "telemetry_category"
 request_id_param: str = "request_id"
+telemetry_group_param: str = "telemetry_group"
 remote_filename_param: str = "remote_filename"
 
 
@@ -28,10 +28,13 @@ def telemetry():
             query_params = request.args
             if request_id_param not in query_params.keys():
                 return Response("[bad request]: missing request_id param", status=400)
-            category_folder = query_params.get(telemetry_category)
+            if telemetry_group_param not in query_params.keys():
+                return Response(
+                    "[bad request]: missing telemetry_group param", status=400
+                )
             folder_name = query_params.get(request_id_param)
-            if category_folder:
-                folder_name = f"{category_folder}/{folder_name}"
+            folder_name = f"{query_params.get(telemetry_group_param)}/{folder_name}"
+
             bucket_name = os.getenv("BUCKET_NAME")
             if bucket_name is None:
                 return Response("BUCKET_NAME env variable not set", status=500)
@@ -70,8 +73,6 @@ def presigned_post():
         )
 
     request_id = query_params[request_id_param]
-    if telemetry_category in query_params.keys():
-        request_id = f"{query_params[telemetry_category]}/{request_id}"
 
     remote_filename = query_params[remote_filename_param]
     s_three = boto3.client("s3")
