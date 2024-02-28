@@ -1,7 +1,7 @@
 import os
 import re
 import json
-from flask import Flask, Response, request, render_template, jsonify, redirect
+from flask import Flask, Response, request, render_template, jsonify, redirect, url_for
 from typing import Optional
 import boto3
 from krkn_lib.models.telemetry import ChaosRunTelemetry, S3BucketObject
@@ -16,7 +16,7 @@ remote_filename_param: str = "remote_filename"
 
 @app.route("/", methods=["GET"])
 def root():
-    return redirect("/files", code=302)
+    return redirect(url_for("get_groups", group_id=None, run_id=None), code=302)
 
 
 ## TELEMETRY JSON API
