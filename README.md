@@ -177,8 +177,8 @@ To set a lambda environment variable please refer to the [AWS Documentation](htt
 ### Usage
 If every step succeeded you should be able to configure your Krkn installation to point to your freshly installed API simply setting the [api_url](https://github.com/redhat-chaos/krkn/blob/c00328cc2b6966c3638cad55d7b6787504bb74fd/config/config.yaml#L70) 
 value and enabling the various telemetry options in the Krkn config.yaml.
-You'll be able to check and download the data collected visiting the telemetry service UI at the address `https://<lambda_url>/production/download`.
-You will find a folder per each run named with the krkn Run Id and a timestamp prefix and, if set, the value of the [run_tag](https://github.com/redhat-chaos/krkn/blob/c00328cc2b6966c3638cad55d7b6787504bb74fd/config/config.yaml#L78) string
+You'll be able to check and download the data collected visiting the telemetry service UI at the address `https://<lambda_url>/production/files`.
+You will find a folder per each `telemetry_group` defined in krkn (all the runs without a `telemetry_group`  will be placed in the `default` folder) and each group folder containing run folders named with the krkn Run Id and a timestamp prefix and, if set, the value of the [run_tag](https://github.com/redhat-chaos/krkn/blob/c00328cc2b6966c3638cad55d7b6787504bb74fd/config/config.yaml#L78) string
 that can be used as search term in the UI. 
 
 ## DISCLAIMER
