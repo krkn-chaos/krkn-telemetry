@@ -11,9 +11,8 @@ python = "^3.9"
 flask = "^2.3.2"
 zappa = "^0.57.0"
 boto3 = "^1.26.148"
-#krkn-lib = "^1.4.5"
-krkn-lib = "^2.0.0"
-
+#krkn-lib = "^2.0.0"
+krkn-lib = "^2.1.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
