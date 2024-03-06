@@ -196,7 +196,7 @@ def get_groups(group_id=None, run_id=None):
 def validate_data_model(model: ChaosRunTelemetry) -> Optional[Response]:
     for scenario in model.scenarios:
         for attr, _ in scenario.__dict__.items():
-            if attr != "parametersBase64":
+            if attr != "parameters_base64":
                 if getattr(scenario, attr) is None or getattr(scenario, attr) == "":
                     return Response(
                         f"[bad request]: {attr} is null or empty", status=400
